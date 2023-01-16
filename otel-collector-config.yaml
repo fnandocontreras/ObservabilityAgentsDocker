@@ -1,0 +1,86 @@
+receivers:
+  filelog:
+    include: [ /logs/WeatherForecast.log ]
+    attributes:
+      Application: weatherforecast
+    operators:
+      - type: json_parser
+        timestamp:
+          parse_from: attributes.time
+          layout: '%Y-%m-%d %H:%M:%S'
+
+  otlp:
+    protocols:
+      grpc:
+  
+  statsd:
+    endpoint: "otel-collector:8125" # default
+    aggregation_interval: 5s  
+    enable_metric_type: false   # default
+    is_monotonic_counter: false # default
+    timer_histogram_mapping:
+      - statsd_type: "histogram"
+        observer_type: "histogram"
+        histogram:
+          max_size: 50
+      - statsd_type: "timing"
+        observer_type: "summary"
+
+exporters:
+  #logs
+  logging:
+    loglevel: debug
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+
+  #metrics
+  file:
+    path: /logs/metrics.json
+
+  #traces
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+
+processors:
+  batch:
+    timeout: 5s
+
+  attributes:
+    actions:
+    - action: insert
+      key: loki.attribute.labels
+      value: http.status_code
+
+  resource:
+    attributes:
+    - action: insert
+      key: loki.attribute.labels
+      value: http.status
+    - action: insert
+      key: loki.resource.labels
+      value: host.name
+  
+
+extensions:
+
+service:
+  extensions: 
+
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+      processors: [resource, attributes]
+      exporters: [loki]
+    metrics:
+      receivers: [otlp, statsd]
+      processors: [batch]
+      exporters: [logging, file]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, otlp]

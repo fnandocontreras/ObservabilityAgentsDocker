@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>71dd7def-5de4-4d19-be5e-e1994748ea05</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="JustEat.StatsD" Version="4.2.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.0" />
+	  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+	  <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.4.0-beta.3" />
+	  <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0-beta.3" />
+	  <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-beta.3" />
+	  <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9.9" />
+	  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.9" />
+	  <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+	  <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
+	  <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+	  <PackageReference Include="Serilog.Exceptions.Refit" Version="8.4.0" />
+	  <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+</Project>
