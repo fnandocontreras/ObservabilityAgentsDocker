@@ -23,6 +23,7 @@
 	  <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 	  <PackageReference Include="Serilog.Exceptions.Refit" Version="8.4.0" />
 	  <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
+	  <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="0.4.0-dev-00073" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
