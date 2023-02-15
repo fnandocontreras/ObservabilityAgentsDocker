@@ -1,6 +1,6 @@
 receivers:
   filelog:
-    include: [ /logs/WeatherForecast.log ]
+    include: [ /logs/otel-agent-test/nlog/**/*.log ]
     attributes:
       Application: weatherforecast
     operators:
@@ -30,22 +30,32 @@ exporters:
   #logs
   logging:
     loglevel: debug
+    
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
     tls:
       insecure: true
+      
+  file/logs:
+    path: /logs/logs.json
+    rotation:
 
-  #metrics
-  file:
-    path: /logs/metrics.json
-
-  #traces
-  otlp:
-    endpoint: tempo:4317
+  elasticsearch/logs:
+    endpoints: [ http://input-loki-ibe-logstash.staging.d-edge.app:5140 ]
+    logs_index: weatherforecast_log_index
     tls:
       insecure: true
 
+  #metrics
+  file/metrics:
+    path: /logs/metrics.json
 
+  #traces
+  otlp/traces:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+      
 processors:
   batch:
     timeout: 5s
@@ -64,7 +74,6 @@ processors:
     - action: insert
       key: loki.resource.labels
       value: host.name
-  
 
 extensions:
 
@@ -73,14 +82,14 @@ service:
 
   pipelines:
     logs:
-      receivers: [otlp, filelog]
-      processors: [resource, attributes]
-      exporters: [loki]
+      receivers: [filelog]
+      processors: []
+      exporters: [file/logs, elasticsearch/logs]
     metrics:
       receivers: [otlp, statsd]
       processors: [batch]
-      exporters: [logging, file]
+      exporters: [logging, file/metrics]
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, otlp]
+      exporters: [logging, otlp/traces]

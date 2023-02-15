@@ -9,6 +9,8 @@ using Serilog;
 using Serilog.Events;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using NLog.Extensions.Logging;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +23,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddLogging();
 
-
 var resourceBuilder = ResourceBuilder
     .CreateDefault()
     .AddService(serviceName: serviceName, serviceVersion: "1.0.0");
 var meter = new Meter(serviceName);
-var counter = meter.CreateCounter<long>("app.request-counter");
+//var counter = meter.CreateCounter<long>("app.request-counter");
 
 builder.Services.AddStatsD(
     (provider) =>
@@ -46,6 +47,8 @@ builder.Services.AddStatsD(
         };
     });
 
+
+builder.Configuration.AddJsonFile("appsettings.json", true, true);
 
 builder.Services.AddOpenTelemetryTracing(
     builder => {
@@ -75,18 +78,26 @@ builder.Services.AddOpenTelemetryMetrics(
 
     });
 
+//
+// builder.Host.UseSerilog((ctx, cfg) =>
+// {
+//     cfg.ReadFrom.Configuration(ctx.Configuration)
+//     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Debug);
+// });
 
-builder.Host.UseSerilog((ctx, cfg) =>
-{
-    cfg.ReadFrom.Configuration(ctx.Configuration)
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Debug);
-});
+builder.Logging
+    .ClearProviders()
+    .SetMinimumLevel(LogLevel.Trace)
+    .AddConfiguration(builder.Configuration.GetSection("Logging"));
+
+NLog.LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("Logging:NLog"));
+
+builder.WebHost.UseNLog();
 
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.All;
 });
-
 
 var app = builder.Build();
 
